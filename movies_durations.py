@@ -31,7 +31,7 @@ def offsets_quartile(offsets, count, q):
             _get_offset_duration(offsets, offset_ceil)
     ) / 2.0
 
-def year_metrics(durations_counts):
+def year_metrics(y, durations_counts):
     total = 0
     for count in durations_counts.values():
         total += count
@@ -57,6 +57,7 @@ def year_metrics(durations_counts):
     r1 = min((pmax, q3 + iqr * 1.5))
 
     return {
+        "x": y,
         "quartiles": [int(q1), int(q2), int(q3)],
         "range": [int(r0), int(r1)],
     }
@@ -94,12 +95,12 @@ def main():
 
     years_metrics = []
     for y, ds in years.items():
-        m = year_metrics(ds)
+        m = year_metrics(y, ds)
         if m:
-            years_metrics.append((y, m))
+            years_metrics.append(m)
 
     with open(opts.output, "w") as f:
-        json.dump(sorted(years_metrics), f)
+        json.dump(sorted(years_metrics, key=lambda m: m["x"]), f)
 
 
 if __name__ == "__main__":

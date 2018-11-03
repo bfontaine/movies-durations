@@ -71,6 +71,7 @@ def main():
         body = json.load(f)
 
     years = defaultdict(Counter)
+    total_movies = 0
 
     for fields in body["results"]["bindings"]:
         pubdate = fields.get("publication_date")
@@ -92,12 +93,15 @@ def main():
             continue
 
         years[year][duration] += 1
+        total_movies += 1
 
     years_metrics = []
     for y, ds in years.items():
         m = year_metrics(y, ds)
         if m:
             years_metrics.append(m)
+
+    print("Got %d movies with duration" % total_movies)
 
     with open(opts.output, "w") as f:
         json.dump(sorted(years_metrics, key=lambda m: m["x"]), f)

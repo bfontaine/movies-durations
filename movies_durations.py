@@ -6,6 +6,7 @@ from collections import defaultdict, Counter
 
 import numpy as np
 
+from query import query
 
 MIN_MOVIES_BY_YEAR = 100
 
@@ -43,30 +44,33 @@ def year_metrics(y, durations_counts):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--file", "-f", default="movies.jsons")
-    p.add_argument("--output", "-o", default="plots.json")
+    p.add_argument("--output", "-o", default="<query>.json")
+    p.add_argument("--force", "-f", action="store_true")
+    p.add_argument("--query", "-q", default="movies")
     opts = p.parse_args()
-    with open(opts.file) as f:
-        body = json.load(f)
+
+    output = opts.output.replace("<query>", opts.query)
+
+    items = query(opts.query, force=opts.force)
 
     years = defaultdict(Counter)
     total_movies = 0
 
-    for fields in body["results"]["bindings"]:
-        pubdate = fields.get("publication_date")
-        if not pubdate or pubdate["type"] != "literal":
+    for item in items:
+        pubdate = item.get("publication_date")
+        if not pubdate:
             continue
 
-        duration = fields.get("duration")
-        if not duration or duration["type"] != "literal":
+        duration = item.get("duration")
+        if not duration or not duration.replace(".", "").isnumeric():
             continue
 
-        year = pubdate["value"].split("-", 1)[0]
-        if len(year) != 4:
+        year = pubdate.split("-", 1)[0]
+        if len(year) != 4 or not year.isnumeric():
             continue
 
         year = int(year)
-        duration = int(float(duration["value"]))
+        duration = int(float(duration))
 
         if not duration or not year:
             continue
@@ -82,7 +86,7 @@ def main():
 
     print("Got %d movies with duration" % total_movies)
 
-    with open(opts.output, "w") as f:
+    with open(output, "w") as f:
         json.dump(sorted(years_metrics, key=lambda m: m["x"]), f)
 
 

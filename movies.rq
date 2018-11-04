@@ -1,4 +1,3 @@
-#Movies
 SELECT DISTINCT ?item ?title ?publication_date ?duration ?country ?countryLabel WHERE {
   ?item wdt:P31 wd:Q11424.
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }

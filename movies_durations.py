@@ -10,27 +10,6 @@ import numpy as np
 MIN_MOVIES_BY_YEAR = 100
 
 
-def _get_offset_duration(offsets, offset):
-    for offset_, duration in offsets:
-        if offset < offset_:
-            return duration
-
-    return offsets[-1][1]
-
-
-def offsets_quartile(offsets, count, q):
-    offset = count * q
-    offset_floor = int(offset)
-    # Easy case
-    if offset == offset_floor:
-        return _get_offset_duration(offsets, offset_floor)
-
-    offset_ceil = offset_floor + 1
-    return (
-        _get_offset_duration(offsets, offset_floor) + \
-            _get_offset_duration(offsets, offset_ceil)
-    ) / 2.0
-
 def year_metrics(y, durations_counts):
     total = 0
     for count in durations_counts.values():
